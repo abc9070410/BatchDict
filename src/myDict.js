@@ -354,7 +354,7 @@ function updateTable()
                 if (gChecked.sound)
                 {
                     sHTML += "<td>";
-                    sHTML += (j == 0 && k == 0 && gaData[i].sound.indexOf("http") == 0) ? "<a href='#' class='PLAY_SOUND'><img src='http://files.softicons.com/download/web-icons/web-2.0-blue-icons-by-axialis-team/png/16/Sound.png'></img></a>" : "";
+                    sHTML += (j == 0 && k == 0 && gaData[i].sound.indexOf("http") == 0) ? "<a class='PLAY_SOUND'><img src='http://files.softicons.com/download/web-icons/web-2.0-blue-icons-by-axialis-team/png/16/Sound.png'></img></a>" : "";
                     
                     //console.log("-->" + "<audio id='SOUND_ID_" + i + "'><source src='" + gaData[i].sound  + "' type='audio/mpeg'></audio>" + "<div onclock='document.getElementById('SOUND_ID_" + i + "').play()'>Play</div>");
                     // "<audio id='SOUND_ID_" + i + "'><source src='" + gaData[i].sound  + "' type='audio/mpeg'></audio>" + 
