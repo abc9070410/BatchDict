@@ -8,6 +8,10 @@
 
 - Chrome browser
 
+## Installation
+
+- Chrome Store (http://tinyurl.com/ppgnv89)
+
 ## Development Environment
 
 - Notepad++
