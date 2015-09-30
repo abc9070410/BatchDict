@@ -388,12 +388,24 @@ function updateTable()
     }
     
     sHTML += "</table>";
-    sHTML += "<div class='Center'>附註:　[U]:不可數名詞(uncountable)　　　[C]:可數名詞(countable)</div>";
+    sHTML += "<div class='Center'>附註:　[U]:不可數名詞(uncountable)　　　[C]:可數名詞(countable)</div><br>";
+    
+    var sBehindHTML = "<!DOCTYPE html><html><head><meta charset='utf-8'></head><body>";
+    var sAfterHTML = "</body></html>";
+    var blob = new Blob([sBehindHTML + sHTML + sAfterHTML], {type: "text/plain;charset=utf-8"});
+    var sUrl = URL.createObjectURL(blob);
+    
+    
+    sHTML += "<a id='OUTPUT_TEXT_ID'>下載HTML表格</a><br>";
     sHTML += "<audio id='SOUND_ID'><source src='' type='audio/mpeg'></audio>";
     
     var eDiv = document.getElementById("RESULT_DIV_ID");
     eDiv.innerHTML = sHTML;
-    eDiv.style.height = "100%";
+    
+    
+    eDiv = document.getElementById("OUTPUT_TEXT_ID");
+    eDiv.href = sUrl;
+    eDiv.onclick = clickOutputHTML;
     
     var aeDiv = document.getElementsByClassName("PLAY_SOUND");
     for (var l = 0; l < aeDiv.length; l++)
@@ -413,14 +425,19 @@ function playAudio()
     eDiv.play();
 }
 
+function clickOutputHTML()
+{
+    this.download = "查詢結果_" + getNowTime() + ".html";   
+}
+
 function sendHttpRequest(sUrl, onReadyFunction, sWord, i)
 {
-  var xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = onReadyFunction;
-  xhr.open("GET", sUrl, true);
-  xhr.send();
-  xhr.index = i;
-  xhr.word = sWord;
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = onReadyFunction;
+    xhr.open("GET", sUrl, true);
+    xhr.send();
+    xhr.index = i;
+    xhr.word = sWord;
 }
 
 
@@ -439,6 +456,33 @@ function setIconEnable()
     });
 }
 
+function getNowTime() 
+{
+    var now     = new Date(); 
+    var year    = now.getFullYear();
+    var month   = now.getMonth()+1; 
+    var day     = now.getDate();
+    var hour    = now.getHours();
+    var minute  = now.getMinutes();
+    var second  = now.getSeconds(); 
+    if(month.toString().length == 1) {
+        var month = '0'+month;
+    }
+    if(day.toString().length == 1) {
+        var day = '0'+day;
+    }   
+    if(hour.toString().length == 1) {
+        var hour = '0'+hour;
+    }
+    if(minute.toString().length == 1) {
+        var minute = '0'+minute;
+    }
+    if(second.toString().length == 1) {
+        var second = '0'+second;
+    }   
+    
+    return year + '' +month + '' + day + '' + hour + '' + minute + '' + second;
+}
 
 
 /*
