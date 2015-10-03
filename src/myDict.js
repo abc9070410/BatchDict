@@ -235,9 +235,9 @@ function handleSearchResult()
         //sHTML = sHTML.split("</li></ul></div></li>")[0];
         sHTML = sHTML.split("synonym_terms")[0];
         
-        var asText = sHTML.split("class=\"fz-s mb-10\"");
-
+        // 1. English -> Chinese
         
+        var asText = sHTML.split("class=\"fz-s mb-10\""); 
         var sText = "";
         var asLexical = [];
         var aasExplanation = [];
@@ -289,6 +289,23 @@ function handleSearchResult()
             }
         }
         
+        if (asText.length < 2)
+        {
+            // 2. Chinese -> English
+            sHTML = sHTML.split("</li></ul></div></li>")[0];
+            asText = sHTML.split("<h4>");
+
+            asLexical[0] = "";
+            aasExplanation[0] = [];
+            
+            for (i = 1; i < asText.length; i++)
+            {
+                iEnd = asText[i].indexOf("</h4>");
+                aasExplanation[0][i - 1] = asText[i].substring(0, iEnd).trim();
+            }
+            
+        }
+        
         // for debug
         for (i = 0; i < asLexical.length; i++)
         {
@@ -298,7 +315,7 @@ function handleSearchResult()
             {
                 console.log(j + "_" + aasExplanation[i][j]);
                 
-                if (aasExample[i][j])
+                if (aasExample[i] && aasExample[i][j])
                 {
                     console.log(j + "_" + aasExample[i][j]);
                 }
