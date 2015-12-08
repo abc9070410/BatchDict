@@ -396,28 +396,21 @@ function updateTable()
                     sHTML += sWord;
                     sHTML += "</td>";
                     
-                    if ((gaData[i].explanation[j].length > 1 && k == 1) ||
-                        (gaData[i].explanation.length > 1 && j == 1))
-                    {
-                        sCSV += "";
-                    }
-                    else
-                    {
-                        sCSV += sWord + sCSVDiv;
-                    }
+                    sCSV += sWord + sCSVDiv;
                 }
                 
                 if (gChecked.phoneticSymbol)
                 {
-                    sHTML += "<td>";
-                    sHTML += (j == 0 && k == 0) ? gaData[i].phoneticSymbol : "";
-                    sHTML += "</td>";
-                    
-                    if ((gaData[i].explanation[j].length > 1 && k == 1) ||
-                        (gaData[i].explanation.length > 1 && j == 1))
+                    var sPhoneticSymbol = "";
+                    if (j == 0 && k == 0)
                     {
-                        sCSV += gaData[i].phoneticSymbol + sCSVDiv;
+                        sPhoneticSymbol = gaData[i].phoneticSymbol.split(" DJ[")[0].trim();
                     }
+                    sHTML += "<td>";
+                    sHTML += sPhoneticSymbol;
+                    sHTML += "</td>";
+
+                    sCSV += sPhoneticSymbol + sCSVDiv;
                 }
                 
                 if (gChecked.sound)
