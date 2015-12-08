@@ -25,7 +25,7 @@ init();
 
 function init()
 {
-    console.log("[YD]INIT");
+    log("INIT");
 
     setLayout();  
 
@@ -74,6 +74,9 @@ function setLayout()
     sHTML += "<br><br>";
     
     eBody.innerHTML = sHTML;
+    
+    var eTitle = document.getElementsByTagName("title")[0];
+    eTitle.innerHTML = "批次字典";
     
     eBody.className = "Body";
 }
@@ -153,7 +156,7 @@ function updateChecked()
         }
     }
     
-    //console.log("[YD]Table Checked: " + gChecked);
+    //log("Table Checked: " + gChecked);
 }
 
 function initData()
@@ -175,24 +178,49 @@ function clickSearchButton()
     
     var eDiv = document.getElementById("TEXTAREA_ID");
     var sText = eDiv.value;
-    console.log("[YD]TEXTAREA : " + sText);
+    log("TEXTAREA : " + sText);
     
     var sBaseUrl = "https://tw.dictionary.yahoo.com/dictionary?p=";
     
-    var asWord = sText.split(/,|\s/g);
+    var asWord = parseWords(sText);//sText.split(/,|\s/g);
     
-    console.log("[YD]Total " + asWord.length + " Words");
+    log("Total " + asWord.length + " Words");
     
     for (var i = 0; i < asWord.length; i ++)
     {
         var sWord = asWord[i].trim();
         var sUrl = sBaseUrl + sWord;
         
-        console.log("[YD]Search " + i + " : " + sWord);
+        log("Search " + i + " : " + sWord);
         
         sendHttpRequest(sUrl, handleSearchResult, sWord, i + 1);
     }
     
+}
+
+function parseWords(sText)
+{
+    var asWord = [];
+    var regExp = new RegExp(/[a-zA-Z]/);
+    var asToken = sText.split(/\r?\n/);
+    
+    for (var i = 0; i < asToken.length; i++)
+    {
+        //log("->" + asToken[i]);
+        var asToken2 = asToken[i].split(/\s|\./);
+        
+        for (var j = 0; j < asToken2.length; j++)
+        {
+            //log(":" + asToken2[j]);
+            if (regExp.test(asToken2[j]))
+            {
+                //log("+ALL E+");
+                asWord[asWord.length] = asToken2[j];
+            }
+        }
+    }
+    
+    return asWord;
 }
 
 function handleSearchResult()
@@ -337,6 +365,8 @@ function handleSearchResult()
 
 function updateTable()
 {
+    var sCSV = "";
+    var sCSVDiv = "○";
     var sHTML = "<table border='2' class='Center'>";
     
     for (var i = 0; i < gaData.length; i ++)
@@ -356,9 +386,25 @@ function updateTable()
                 
                 if (gChecked.word)
                 {
+                    var sWord = "";
+                    if (j == 0 && k == 0)
+                    {
+                        sWord = gaData[i].word;
+                    }
+                    
                     sHTML += "<td>";
-                    sHTML += (j == 0 && k == 0) ? gaData[i].word : "";
+                    sHTML += sWord;
                     sHTML += "</td>";
+                    
+                    if ((gaData[i].explanation[j].length > 1 && k == 1) ||
+                        (gaData[i].explanation.length > 1 && j == 1))
+                    {
+                        sCSV += "";
+                    }
+                    else
+                    {
+                        sCSV += sWord + sCSVDiv;
+                    }
                 }
                 
                 if (gChecked.phoneticSymbol)
@@ -366,6 +412,12 @@ function updateTable()
                     sHTML += "<td>";
                     sHTML += (j == 0 && k == 0) ? gaData[i].phoneticSymbol : "";
                     sHTML += "</td>";
+                    
+                    if ((gaData[i].explanation[j].length > 1 && k == 1) ||
+                        (gaData[i].explanation.length > 1 && j == 1))
+                    {
+                        sCSV += gaData[i].phoneticSymbol + sCSVDiv;
+                    }
                 }
                 
                 if (gChecked.sound)
@@ -381,31 +433,54 @@ function updateTable()
                 
                 if (gChecked.lexical)
                 {
+                    var sLexical = "";
+                    if (k == 0)
+                    {
+                        sLexical = gaData[i].lexical[j];
+                    }
                     sHTML += "<td>";
-                    sHTML += (k == 0) ? gaData[i].lexical[j] : "";
+                    sHTML += sLexical;
                     sHTML += "</td>";
+                    
+                    sCSV += sLexical + sCSVDiv;
                 }
                 if (gChecked.explanation)
                 {
                     sHTML += "<td>";
                     sHTML += gaData[i].explanation[j][k];
                     sHTML += "</td>";   
+                    
+                    sCSV += gaData[i].explanation[j][k] + sCSVDiv;
                 }
                 if (gChecked.example)
                 {
+                    var sExample = "";
+                    
+                    if (gaData[i].example[j] && gaData[i].example[j][k])
+                    {
+                        sExample = gaData[i].example[j][k];
+                    }
+                    
                     sHTML += "<td>";
-                    sHTML += (gaData[i].example[j] && gaData[i].example[j][k]) ? gaData[i].example[j][k] : "";
+                    sHTML += sExample;
                     sHTML += "</td>";      
+                    
+                    sCSV += sExample;
                 }                
 
                 sHTML += "</tr>";
+                
+                sCSV += "\r\n";
             }
         }
-
     }
     
+    var sRef = "附註:　[U]:不可數名詞(uncountable)　　　[C]:可數名詞(countable)";
+    
     sHTML += "</table>";
-    sHTML += "<div class='Center'>附註:　[U]:不可數名詞(uncountable)　　　[C]:可數名詞(countable)</div><br>";
+    sHTML += "<div class='Center'>" + sRef + "</div><br>";
+    
+    sCSV += sRef;
     
     var sBehindHTML = "<!DOCTYPE html><html><head><meta charset='utf-8'></head><body>";
     var sAfterHTML = "</body></html>";
@@ -413,16 +488,27 @@ function updateTable()
     var sUrl = URL.createObjectURL(blob);
     
     
-    sHTML += "<a id='OUTPUT_TEXT_ID'>下載HTML表格</a><br>";
+    sHTML += "<a id='OUTPUT_HTML_ID'>下載HTML表格</a><br>";
+    sHTML += "<audio id='SOUND_ID'><source src='' type='audio/mpeg'></audio>";
+    sHTML += "<hr>";
+    sHTML += "<a id='OUTPUT_CSV_ID'>下載CSV表格</a><br>";
     sHTML += "<audio id='SOUND_ID'><source src='' type='audio/mpeg'></audio>";
     
     var eDiv = document.getElementById("RESULT_DIV_ID");
     eDiv.innerHTML = sHTML;
     
     
-    eDiv = document.getElementById("OUTPUT_TEXT_ID");
+    eDiv = document.getElementById("OUTPUT_HTML_ID");
     eDiv.href = sUrl;
     eDiv.onclick = clickOutputHTML;
+    
+    sCSV = sCSV.replace(/,/g, "，").replace(/○/g, ",");
+    blob = new Blob([sCSV], {type: "text/plain;charset=utf-8"});
+    sUrl = URL.createObjectURL(blob);
+    
+    eDiv = document.getElementById("OUTPUT_CSV_ID");
+    eDiv.href = sUrl;
+    eDiv.onclick = clickOutputCSV;
     
     var aeDiv = document.getElementsByClassName("PLAY_SOUND");
     for (var l = 0; l < aeDiv.length; l++)
@@ -434,7 +520,7 @@ function updateTable()
 
 function playAudio()
 {
-    console.log("[YD]Play Audio : " + this.index);
+    log("Play Audio : " + this.index);
     
     var eDiv = document.getElementById("SOUND_ID");
     
@@ -445,6 +531,11 @@ function playAudio()
 function clickOutputHTML()
 {
     this.download = "查詢結果_" + getNowTime() + ".html";   
+}
+
+function clickOutputCSV()
+{
+    this.download = "查詢結果_" + getNowTime() + ".csv";   
 }
 
 function sendHttpRequest(sUrl, onReadyFunction, sWord, i)
@@ -501,6 +592,10 @@ function getNowTime()
     return year + '' +month + '' + day + '' + hour + '' + minute + '' + second;
 }
 
+function log(sText)
+{
+    console.log("[YD]" + sText);
+}
 
 /*
 
